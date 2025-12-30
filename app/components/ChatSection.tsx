@@ -97,7 +97,7 @@ export default function ChatSection() {
             
             {loading && (
               <div className="flex items-center gap-2 text-slate-400 text-xs ml-2 mt-2">
-                 <Loader2 size={12} className="animate-spin"/> Mengetik...
+                 <Loader2 size={12} className="animate-spin"/> Mohon tunggu...
               </div>
             )}
           </div>
