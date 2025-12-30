@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     // Cari konteks dari Pinecone
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
     const queryResponse = await index.query({
-      vector: embedding[0].values, // Ambil hasil vector dari cloud
+      vector: (embedding as any)[0].values, // Ambil hasil vector dari cloud
       topK: 5, 
       includeMetadata: true,
     });
