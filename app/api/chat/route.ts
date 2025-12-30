@@ -2,32 +2,44 @@ import { NextResponse } from 'next/server';
 import { Pinecone } from '@pinecone-database/pinecone';
 import Groq from 'groq-sdk';
 
-const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY!,
-});
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
 export async function POST(req: Request) {
+  console.log("--- MULAI API CHAT ---"); // [LOG 1] Penanda Mulai
+
   try {
+    // [CHECK 1] Pastikan Kunci Ada (Seringkali ini penyebab error 500)
+    if (!process.env.PINECONE_API_KEY || !process.env.GROQ_API_KEY || !process.env.PINECONE_INDEX_NAME) {
+      throw new Error("Kunci Rahasia (API KEY) belum dimasukkan di Netlify!");
+    }
+
+    // [INIT] Inisialisasi di dalam try/catch agar aman
+    const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
+    console.log("📩 Pesan masuk:", lastMessage); // [LOG 2] Cek pesan
 
     // Embedding dengan Pinecone Cloud
+    console.log("🔄 Sedang Embedding..."); 
     const embedding = await pinecone.inference.embed(
       "multilingual-e5-large",
       [lastMessage],
       { inputType: 'query' }
     );
 
+    // [CHECK 2] Pastikan hasil embedding valid
+    const vectorValues = (embedding as any)[0]?.values;
+    if (!vectorValues) throw new Error("Gagal membuat vector (Embedding kosong).");
+
     // Cari konteks dari Pinecone
-    const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
+    console.log("🔎 Mencari di Database...");
+    const index = pinecone.Index(process.env.PINECONE_INDEX_NAME);
     const queryResponse = await index.query({
-      vector: (embedding as any)[0].values, // Ambil hasil vector dari cloud
+      vector: vectorValues, 
       topK: 5, 
       includeMetadata: true,
     });
+    console.log(`✅ Ditemukan ${queryResponse.matches.length} data.`);
 
     const contextText = queryResponse.matches
       .map((match) => match.metadata?.text)
@@ -63,6 +75,8 @@ export async function POST(req: Request) {
     ${contextText}
     `;
 
+    // Kirim ke Groq
+    console.log("🤖 Mengirim ke Groq...");
     const completion = await groq.chat.completions.create({
       messages: [
         { role: 'system', content: systemPrompt },
@@ -73,11 +87,19 @@ export async function POST(req: Request) {
     });
 
     const reply = completion.choices[0]?.message?.content || "Maaf, sistem sedang sibuk.";
+    console.log("✅ Selesai.");
     
     return NextResponse.json({ reply });
 
-  } catch (error) {
-    console.error("Error:", error);
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+  } catch (error: any) {
+    // [LOGGING ERROR FATAL]
+    console.error("❌ ERROR:", error);
+    console.error("Pesan:", error.message);
+    
+    // [PENTING] Kirim pesan error ke Chat Bubble supaya kamu bisa baca
+    // Status 200 supaya frontend tidak error, tapi menampilkan pesan masalahnya
+    return NextResponse.json({ 
+      reply: `⚠️ TERJADI ERROR: ${error.message}. (Cek Logs Netlify untuk detail)` 
+    }, { status: 200 });
   }
 }
