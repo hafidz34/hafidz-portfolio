@@ -6,9 +6,9 @@ export async function POST(req: Request) {
   console.log("--- MULAI API CHAT (FINAL PROMPT) ---");
 
   try {
-    // 1. Cek Kunci
+    // Inisialisasi Pinecone dan Groq
     if (!process.env.PINECONE_API_KEY || !process.env.GROQ_API_KEY || !process.env.PINECONE_INDEX_NAME) {
-      throw new Error("Kunci Rahasia (API KEY) belum dimasukkan di Netlify!");
+      throw new Error("API KEY belum dimasukkan di Netlify.");
     }
 
     const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
@@ -16,18 +16,17 @@ export async function POST(req: Request) {
 
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
-    console.log("📩 Pesan:", lastMessage);
+    console.log("Pesan:", lastMessage);
 
-    // 2. Embedding (Logic Aman)
-    console.log("🔄 Embedding ke Pinecone Cloud...");
+    // Embedding
+    console.log("Embedding ke Pinecone Cloud...");
     const embeddingResponse = await pinecone.inference.embed(
       "multilingual-e5-large",
       [lastMessage],
       { inputType: 'query' }
     );
 
-    // --- BAGIAN LOGIC FIX (JANGAN DIUBAH) ---
-    // Cek struktur data agar tidak error "undefined"
+    // Cek struktur data embeddingResponse
     let vectorValues;
     if ((embeddingResponse as any).data) {
         vectorValues = (embeddingResponse as any).data[0].values;
@@ -40,24 +39,22 @@ export async function POST(req: Request) {
     if (!vectorValues) {
         throw new Error("Gagal mengekstrak vector values. Format respon tidak dikenali.");
     }
-    // -----------------------------------------
 
-    console.log("✅ Vector aman.");
+    console.log("Vector aman.");
 
-    // 3. Query Database
+    // Query Database
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME);
     const queryResponse = await index.query({
       vector: vectorValues, 
       topK: 5, 
       includeMetadata: true,
     });
-    console.log(`🔎 Ketemu ${queryResponse.matches.length} data.`);
+    console.log(`Ketemu ${queryResponse.matches.length} data.`);
 
     const contextText = queryResponse.matches
       .map((match) => match.metadata?.text)
       .join('\n---\n');
 
-    // --- BAGIAN PROMPT UTAMA (SESUAI REQUEST KAMU) ---
     const systemPrompt = `
     PERAN:
     Kamu adalah asisten profesional untuk portofolio "Muhammad Hafidz Rizki".
@@ -87,10 +84,9 @@ export async function POST(req: Request) {
     DATA FAKTA:
     ${contextText}
     `;
-    // -------------------------------------------------
 
-    // 4. Groq Generation
-    console.log("🤖 Mengirim ke Groq...");
+    // Chat Completion
+    console.log("Mengirim ke Groq...");
     const completion = await groq.chat.completions.create({
       messages: [
         { role: 'system', content: systemPrompt },
@@ -105,9 +101,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply });
 
   } catch (error: any) {
-    console.error("❌ ERROR:", error);
+    console.error("ERROR:", error);
     return NextResponse.json({ 
-      reply: `⚠️ ERROR SISTEM: ${error.message}` 
+      reply: `ERROR SYSTEM: ${error.message}` 
     }, { status: 200 });
   }
 }
