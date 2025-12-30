@@ -11,12 +11,12 @@ const groq = new Groq({
 });
 
 class EmbeddingPipeline {
-  static task = 'feature-extraction';
   static model = 'Xenova/all-MiniLM-L6-v2';
   static instance: any = null;
+  
   static async getInstance() {
     if (this.instance === null) {
-      this.instance = await pipeline(this.task, this.model);
+      this.instance = await pipeline('feature-extraction', this.model);
     }
     return this.instance;
   }
