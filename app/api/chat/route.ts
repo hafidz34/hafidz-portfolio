@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Pinecone } from '@pinecone-database/pinecone';
 import Groq from 'groq-sdk';
-import { pipeline } from '@xenova/transformers';
 
 const pinecone = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY!,
@@ -10,30 +9,22 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-class EmbeddingPipeline {
-  static model = 'Xenova/all-MiniLM-L6-v2';
-  static instance: any = null;
-  
-  static async getInstance() {
-    if (this.instance === null) {
-      this.instance = await pipeline('feature-extraction', this.model);
-    }
-    return this.instance;
-  }
-}
-
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
 
-    const extractor = await EmbeddingPipeline.getInstance();
-    const output = await extractor(lastMessage, { pooling: 'mean', normalize: true });
-    const queryVector = Array.from(output.data);
+    // Embedding dengan Pinecone Cloud
+    const embedding = await pinecone.inference.embed(
+      "multilingual-e5-large",
+      [lastMessage],
+      { inputType: 'query' }
+    );
 
+    // Cari konteks dari Pinecone
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME!);
     const queryResponse = await index.query({
-      vector: queryVector as number[],
+      vector: embedding[0].values, // Ambil hasil vector dari cloud
       topK: 5, 
       includeMetadata: true,
     });
@@ -63,9 +54,10 @@ export async function POST(req: Request) {
        - Menyebutkan daftar data mentah yang banyak (lebih dari 3 item).
        - Merinci spesifikasi teknis (tech stack), daftar tugas harian, atau pro & kontra yang kompleks.
        - Tujuannya agar pembaca bisa memindai (scan) informasi dengan cepat.
-
+    
     TUJUAN:
-    Prioritaskan kenyamanan pembaca. Jangan memaksakan bullet points jika kalimat biasa lebih mengalir, tapi jangan membuat tembok teks jika isinya adalah daftar poin.
+    Prioritaskan kenyamanan pembaca. Jangan memaksakan bullet points jika kalimat biasa lebih 
+    mengalir, tapi jangan membuat tembok teks jika isinya adalah daftar poin.
 
     DATA FAKTA:
     ${contextText}

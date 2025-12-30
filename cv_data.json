@@ -1,0 +1,140 @@
+{
+  "personal_info": {
+    "name": "Muhammad Hafidz Rizki",
+    "role": "AI Intern @ PT SPIL | Associate Data Scientist",
+    "email": "hafidzrizki443@gmail.com",
+    "linkedin": "www.linkedin.com/in/hafidzrizki34",
+    "university": "IPB University",
+    "degree": "Bachelor's Degree in Computer Science (2022-2026 Expected)",
+    "summary": "Computer science student interested in data analysis and machine learning. Experienced in developing and deploying ML models. Enthusiastic about entrepreneurship, managing small businesses, and leading organizational divisions."
+  },
+  "work_experience": [
+    {
+      "company": "PT Salam Pacific Indonesia Lines (SPIL)",
+      "role": "AI Project Intern",
+      "period": "Sep 2025 - Present",
+      "description": "Developing AI-integrated web solutions for logistics.",
+      "key_achievements": [
+        "Developed web-based dashboards and medical early warning systems using React.js, Flask, and PostgreSQL.",
+        "Built predictive models to estimate time-to-next-failure of operational equipment.",
+        "Created 'IER Case Management' app integrated with internal LLM services."
+      ]
+    },
+    {
+      "company": "Cuski - Cuci Sepatu Kita",
+      "role": "Operations Manager",
+      "period": "Nov 2024 - Present",
+      "description": "Managing operational execution and business growth.",
+      "key_achievements": [
+        "Managed operational execution, administration, and control.",
+        "Handled market research, social media marketing, and market planning for small business growth."
+      ]
+    },
+    {
+      "company": "Coding Camp powered by DBS Foundation",
+      "role": "Machine Learning Engineer Cohort",
+      "period": "Feb 2025 - Jul 2025",
+      "description": "Intensive ML bootcamp focusing on real-world case studies.",
+      "key_achievements": [
+        "Developed ML models using Python, TensorFlow, and Keras.",
+        "Performed end-to-end data pipeline creation and statistical analysis."
+      ]
+    },
+    {
+      "company": "Himpunan Mahasiswa Ilmu Komputer IPB",
+      "role": "Entrepreneur Staff",
+      "period": "Jan 2024 - Dec 2024",
+      "description": "Managed business planning and project delivery.",
+      "key_achievements": [
+        "Executed business analysis and process planning.",
+        "Collaborated in team negotiation and project delivery."
+      ]
+    },
+    {
+      "company": "CPSC IPB",
+      "role": "Head of Funding Division",
+      "period": "Jul 2024 - Oct 2024",
+      "description": "Led fundraising and financial planning.",
+      "key_achievements": [
+        "Managed sponsorship, partnerships, and fundraising strategies.",
+        "Responsible for budgeting and financial planning."
+      ]
+    },
+    {
+      "company": "First Year Performance Foundation",
+      "role": "Tutor",
+      "period": "Sep 2023 - Sep 2024",
+      "description": "Academic guidance for first-year students.",
+      "key_achievements": [
+        "Tutored Computational Thinking, Statistics, Algorithms, and Discrete Math.",
+        "Provided offline and online tutoring support."
+      ]
+    }
+  ],
+  "volunteering": [
+    {
+      "org": "LPK Tepi Sawah x Ilkomerz Mengajar",
+      "role": "Volunteer Teacher",
+      "period": "Feb 2024 - Nov 2024",
+      "details": "Teaching volunteer for children at Cikonjen Village using interactive methods to enhance educational access."
+    },
+    {
+      "org": "IEEE IPB Student Branch",
+      "role": "Logistics Officer (STEM 2023 & IEEEXtreme 17.0)",
+      "period": "Sep 2023 - Oct 2023",
+      "details": "Organized logistics for workshops introducing informatics to high school students and programming competitions."
+    },
+    {
+      "org": "Yayasan Sagasitas Indonesia",
+      "role": "Master Trainer",
+      "period": "Dec 2023 - Jan 2024",
+      "details": "Science and Technology trainer."
+    }
+  ],
+  "organizations": [
+    {
+      "name": "IEEE IPB Student Branch",
+      "role": "Vice President of Finance and Administration",
+      "period": "Feb 2024 - Dec 2024",
+      "details": "Led financial management, budgeting, reporting, and strategic decision-making."
+    },
+    {
+      "name": "IPB E-Sport",
+      "role": "Event and Partnership Division",
+      "period": "Jan 2023 - Dec 2023",
+      "details": "Managed event management, negotiation, and sponsorship partnerships."
+    }
+  ],
+  "projects": [
+    {
+      "name": "Qtancy",
+      "role": "ML & Backend Integrator",
+      "tech_stack": ["TensorFlow", "OCR", "BiLSTM", "REST API"],
+      "description": "AI-Powered Receipt Management.",
+      "details": "Extract info from receipts using OCR and categorize transactions using BiLSTM."
+    },
+    {
+      "name": "IPB Dataverse",
+      "role": "Developer",
+      "tech_stack": ["CKAN", "Docker"],
+      "description": "Research Data Portal.",
+      "details": "Customized CKAN portal for research data discovery."
+    }
+  ],
+  "certifications": [
+    "Associate Data Scientist - BNSP",
+    "Membangun Sistem Machine Learning - Dicoding",
+    "Machine Learning Terapan - Dicoding",
+    "Belajar Dasar Cloud dan Gen AI di AWS - Dicoding",
+    "Next.js App Router Fundamentals - Vercel",
+    "Financial Literacy 101 - Dicoding",
+    "Belajar Dasar SQL - Dicoding"
+  ],
+  "technical_skills": {
+    "languages": ["Python", "JavaScript", "TypeScript", "SQL"],
+    "frameworks_libraries": ["React.js", "Next.js", "Flask", "TensorFlow", "Scikit-learn", "Tailwind CSS"],
+    "tools": ["Git", "Docker", "PostgreSQL"],
+    "spoken_languages": ["Indonesian (Native)", "English (Limited Working Proficiency)"],
+    "soft_skills": ["Leadership", "Entrepreneurship", "Public Speaking", "Teamwork"]
+  }
+}
