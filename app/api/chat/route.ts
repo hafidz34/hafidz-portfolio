@@ -3,48 +3,61 @@ import { Pinecone } from '@pinecone-database/pinecone';
 import Groq from 'groq-sdk';
 
 export async function POST(req: Request) {
-  console.log("--- MULAI API CHAT ---"); // [LOG 1] Penanda Mulai
+  console.log("--- MULAI API CHAT (FINAL PROMPT) ---");
 
   try {
-    // [CHECK 1] Pastikan Kunci Ada (Seringkali ini penyebab error 500)
+    // 1. Cek Kunci
     if (!process.env.PINECONE_API_KEY || !process.env.GROQ_API_KEY || !process.env.PINECONE_INDEX_NAME) {
       throw new Error("Kunci Rahasia (API KEY) belum dimasukkan di Netlify!");
     }
 
-    // [INIT] Inisialisasi di dalam try/catch agar aman
     const pinecone = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
-    console.log("📩 Pesan masuk:", lastMessage); // [LOG 2] Cek pesan
+    console.log("📩 Pesan:", lastMessage);
 
-    // Embedding dengan Pinecone Cloud
-    console.log("🔄 Sedang Embedding..."); 
-    const embedding = await pinecone.inference.embed(
+    // 2. Embedding (Logic Aman)
+    console.log("🔄 Embedding ke Pinecone Cloud...");
+    const embeddingResponse = await pinecone.inference.embed(
       "multilingual-e5-large",
       [lastMessage],
       { inputType: 'query' }
     );
 
-    // [CHECK 2] Pastikan hasil embedding valid
-    const vectorValues = (embedding as any)[0]?.values;
-    if (!vectorValues) throw new Error("Gagal membuat vector (Embedding kosong).");
+    // --- BAGIAN LOGIC FIX (JANGAN DIUBAH) ---
+    // Cek struktur data agar tidak error "undefined"
+    let vectorValues;
+    if ((embeddingResponse as any).data) {
+        vectorValues = (embeddingResponse as any).data[0].values;
+    } else if (Array.isArray(embeddingResponse)) {
+        vectorValues = (embeddingResponse as any)[0].values;
+    } else {
+        vectorValues = (embeddingResponse as any).values; 
+    }
 
-    // Cari konteks dari Pinecone
-    console.log("🔎 Mencari di Database...");
+    if (!vectorValues) {
+        throw new Error("Gagal mengekstrak vector values. Format respon tidak dikenali.");
+    }
+    // -----------------------------------------
+
+    console.log("✅ Vector aman.");
+
+    // 3. Query Database
     const index = pinecone.Index(process.env.PINECONE_INDEX_NAME);
     const queryResponse = await index.query({
       vector: vectorValues, 
       topK: 5, 
       includeMetadata: true,
     });
-    console.log(`✅ Ditemukan ${queryResponse.matches.length} data.`);
+    console.log(`🔎 Ketemu ${queryResponse.matches.length} data.`);
 
     const contextText = queryResponse.matches
       .map((match) => match.metadata?.text)
       .join('\n---\n');
 
+    // --- BAGIAN PROMPT UTAMA (SESUAI REQUEST KAMU) ---
     const systemPrompt = `
     PERAN:
     Kamu adalah asisten profesional untuk portofolio "Muhammad Hafidz Rizki".
@@ -74,8 +87,9 @@ export async function POST(req: Request) {
     DATA FAKTA:
     ${contextText}
     `;
+    // -------------------------------------------------
 
-    // Kirim ke Groq
+    // 4. Groq Generation
     console.log("🤖 Mengirim ke Groq...");
     const completion = await groq.chat.completions.create({
       messages: [
@@ -87,19 +101,13 @@ export async function POST(req: Request) {
     });
 
     const reply = completion.choices[0]?.message?.content || "Maaf, sistem sedang sibuk.";
-    console.log("✅ Selesai.");
     
     return NextResponse.json({ reply });
 
   } catch (error: any) {
-    // [LOGGING ERROR FATAL]
     console.error("❌ ERROR:", error);
-    console.error("Pesan:", error.message);
-    
-    // [PENTING] Kirim pesan error ke Chat Bubble supaya kamu bisa baca
-    // Status 200 supaya frontend tidak error, tapi menampilkan pesan masalahnya
     return NextResponse.json({ 
-      reply: `⚠️ TERJADI ERROR: ${error.message}. (Cek Logs Netlify untuk detail)` 
+      reply: `⚠️ ERROR SISTEM: ${error.message}` 
     }, { status: 200 });
   }
 }
