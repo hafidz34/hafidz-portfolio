@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Mencegah error saat menggunakan library AI di sisi server
+  serverExternalPackages: ['@xenova/transformers'],
 };
 
 export default nextConfig;
